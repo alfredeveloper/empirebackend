@@ -292,8 +292,9 @@ function updateStatus (req, res) {
 
     if(req.body.status == 'aceptado') {
       let transporter = nodeMailer.createTransport({
-        host: 'empirebackend.herokuapp.com',
-        port: 26,
+        sendmail: true,
+        host: 'smtp.gmail.com',
+        port: 465,
         secure: true,
         auth: {
             // should be replaced with real sender's account
@@ -321,6 +322,7 @@ function updateStatus (req, res) {
     } else if (req.body.status == 'rechazado') {
 
       let transporter = nodeMailer.createTransport({
+        sendmail: true,
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
