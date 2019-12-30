@@ -324,7 +324,7 @@ function updateStatus (req, res) {
       let transporter = nodeMailer.createTransport({
         sendmail: true,
         host: 'smtp.gmail.com',
-        port: 465,
+        port: 587,
         secure: true,
         auth: {
             // should be replaced with real sender's account
