@@ -292,8 +292,8 @@ function updateStatus (req, res) {
 
     if(req.body.status == 'aceptado') {
       let transporter = nodeMailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
+        host: 'empirebackend.herokuapp.com',
+        port: 80,
         secure: true,
         auth: {
             // should be replaced with real sender's account
