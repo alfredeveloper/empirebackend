@@ -13,9 +13,6 @@ const MomentDataJuridicalSchema = new Schema({
     tipoDocumento: { type: String, enum: ['01', '04', '06', '07', '11', '00'] },
     numDocumento: String,
     fechaNacimiento: Date,
-    correo: { type: String, unique: true, lowercase: true },
-    contrasenia: { type: String, select: true },
-    momentContrasenia: {type: String}, 
     genero: { type: String, enum: ['masculino', 'femenino'] },
     telefono: String,
     ocupacion: String,
@@ -29,11 +26,9 @@ const MomentDataJuridicalSchema = new Schema({
     distritoJuridical: String,
     direccionJuridical: String,
     sede_registral: String,
-    correoJuridical: String,
-    nombreComercial: String,
     telefonoJuridical: String,
 
-    user: {type: Schema.Types.ObjectId, ref: 'User'},
+    client: {type: Schema.Types.ObjectId, ref: 'Client'},
     
 },{timestamps: {createdAt: 'created_at', updatedAt: 'updated_at'}})
 

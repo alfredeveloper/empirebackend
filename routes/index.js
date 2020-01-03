@@ -26,6 +26,9 @@ api.post('/save/moment/natural', clientController.updateMomentNatural)
 api.post('/save/moment/juridical', clientController.updateMomentJuridical)
 api.get('/get/data/natural/:id', clientController.getDataNatural)
 api.get('/get/data/juridical/:id', clientController.getDataJuridical)
+api.post('/request/change/password', clientController.requestChangePassword)
+api.put('/change/password/admin', clientController.changePasswordAdmin)
+api.put('/change/password/link', clientController.changePasswordFromLink)
 
 // administrador
 api.get('/managers/:id', managerController.getManager);

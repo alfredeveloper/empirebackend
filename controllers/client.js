@@ -2,8 +2,8 @@ const Client = require('../models/client')
 const User = require('../models/user')
 const ClientNatural = require('../models/client_natural')
 const ClientJuridical = require('../models/client_juridical')
-const MomentDataNaturalSchema = require('../models/moment_data_natural')
-const MomentDataJuridicalSchema = require('../models/moment_data_juridical')
+const MomentDataNatural = require('../models/moment_data_natural')
+const MomentDataJuridical = require('../models/moment_data_juridical')
 const Request = require('../models/request')
 const service = require('../services')
 var bcrypt = require('bcryptjs');
@@ -20,11 +20,12 @@ function registerClient(req, res) {
   user.save(( err, userSaved ) => {
 
     if (err) return res.status(500).send({ message: `Error al crear el usuario: ${err}` })
-    
+
     let clientData = {
       esCliente: true,
       user: userSaved._id,
       code: Math.floor((Math.random()*1000000000)+1),
+      typeClient: req.body.tipoCliente 
     }
     
     const client = new Client(clientData)
@@ -65,8 +66,6 @@ function registerClient(req, res) {
 
             clientNatural.save((err, naturalSaved) => {
                 if(err) return res.status(500).send({message: 'Error en el servido', status: false})
-
-                
 
                 return res.status(201).send({message: 'Nueva persona natural', data: {user: userSaved, client: clientSaved, natural: naturalSaved}, status: true})
             })
@@ -132,7 +131,7 @@ function updateClient ( req, res ) {
           user.direccion = req.body.direccion;
           user.genero = req.body.genero;
           user.tipoDocumento = req.body.tipoDocumento;
-          user.numdoc = req.body.numdoc;
+          user.numDocumento = req.body.numdoc;
           user.fechaNacimiento = req.body.fechaNacimiento;
           user.correo = req.body.correo;
           user.telefono = req.body.telefono;
@@ -229,8 +228,29 @@ function login (req, res) {
     console.log(user.contrasenia)
     if(user.contrasenia == undefined || user.contrasenia == null || user.contrasenia == 'undefined') {
       if(user.momentContrasenia == req.body.contrasenia) {
-    
-        return res.status(201).send({message: 'Peticion exitosa', status: true, data: user})
+        
+        Client.findOne({user: user._id}, (err, client) => {
+
+          if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
+          
+          if(client.typeClient == 'natural') {
+            ClientNatural.findOne({client: client._id}, (err, clientNatural) => {
+
+              if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+
+              return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientNatural._id})
+            })
+          }else {
+            ClientJuridical.findOne({client: client._id}, (err, clientJuridical) => {
+
+              if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+
+              return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientJuridical._id})
+            })
+          }
+
+
+        })
         
       }else {
         
@@ -241,7 +261,26 @@ function login (req, res) {
 
     if(!bcrypt.compareSync(req.body.contrasenia, user.contrasenia)) return res.status(404).send({message: 'Credenciales incorrectas - contraseña', status: false})
 
-    return res.status(201).send({message: 'Peticion exitosa', status: true, data: user})
+    Client.findOne({user: user._id}, (err, client) => {
+
+      if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
+
+      if(client.typeClient == 'natural') {
+        ClientNatural.findOne({client: client._id}, (err, clientNatural) => {
+          console.log('cleinte natuarl', clientNatural)
+          if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+
+          return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientNatural._id})
+        })
+      }else {
+        ClientJuridical.findOne({client: client._id}, (err, clientJuridical) => {
+
+          if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+
+          return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientJuridical._id})
+        })
+      }
+    })
 
   })
 
@@ -357,7 +396,7 @@ function updateStatus (req, res) {
 
 function updateMomentNatural (req, res) {
   
-  const natural = new MomentDataNaturalSchema(req.body)
+  const natural = new MomentDataNatural(req.body)
 
   natural.save((err, naturalSaved)=> {
 
@@ -369,7 +408,7 @@ function updateMomentNatural (req, res) {
       fecha_solicitud: Date.now(),
       fecha_respuesta: Date.now(),
       resultado: 'pendiente',
-      client: req.body.id
+      client: req.body.client
     }
 
     let request = new Request(data)
@@ -377,7 +416,9 @@ function updateMomentNatural (req, res) {
 
       if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
 
-      return res.status(201).send({message: 'Datos momentáneos de Persona Natural Registrado', status: true, data: naturalSaved})
+      return res.status(201).send({messaeg: `Peticion de solicitud realizada`, status: true})
+      
+    
     })
 
   })
@@ -386,7 +427,7 @@ function updateMomentNatural (req, res) {
 
 function updateMomentJuridical (req, res) {
 
-  const juridical = MomentDataJuridicalSchema(req.body)
+  const juridical = new MomentDataJuridical(req.body)
 
   juridical.save((err, juridicalSaved) => {
 
@@ -399,7 +440,7 @@ function updateMomentJuridical (req, res) {
       fecha_solicitud: Date.now(),
       fecha_respuesta: Date.now(),
       resultado: 'pendiente',
-      client: req.body.id
+      client: req.body.client
     }
 
     let request = new Request(data)
@@ -408,7 +449,9 @@ function updateMomentJuridical (req, res) {
 
       if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
 
-      return res.status(201).send({message: 'Datos momentáneos de Persona Jurídica Registrado', status: true, data: juridicalSaved})
+      return res.status(201).send({messaeg: `Peticion de solicitud realizada`, status: true})
+      
+
     
     })
 
@@ -418,7 +461,7 @@ function updateMomentJuridical (req, res) {
 }
 
 function getDataNatural(req, res) {
-
+  console.log('natural')
   ClientNatural.findOne({_id: req.params.id}).populate({path: 'client', populate: {path: 'user'}}).exec((err, data)=> {
 
     if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
@@ -441,6 +484,77 @@ function getDataJuridical(req, res) {
 
 }
 
+function requestChangePassword(req, res) {
+
+  User.findOne({correo: req.body.correo}, (err, user) => {
+
+    if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
+
+    if(!user) return res.status(404).send({message: 'No se encontro al usuario', status: false})
+
+    console.log('correo electronico', req.body.correo)
+    let transporter = nodeMailer.createTransport({
+      sendmail: true,
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+          // should be replaced with real sender's account
+          user: 'mifarmatest@gmail.com',
+          pass: 'mifarmatest123456'
+      }
+    });
+    let mailOptions = {
+        // should be replaced with real recipient's account
+        to: req.body.correo,
+        subject: "Cambio de contraseña - Empire",
+        text: `Solicitud de cambio de contraseña`,
+        html: `<p>Solicitud de cambio de contraseña: </p>
+        Ingrese al siguiente link para el cambio de contraseña: <a href="https://empirefrontend.herokuapp.com/#/cambio-de-contraseña" target="_blank"><b>cambiar contraseña</b></a> <br>
+        `                
+      };
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return console.log(error);
+        }
+        console.log('Message %s sent: %s', info.messageId, info.response);
+    });
+    
+
+    return res.status(201).send({message: 'Solicitud enviada', status: true})
+
+  })
+}
+
+function changePasswordAdmin(req, res) {
+
+  User.findOne({_id: req.body.userId}, (err, user) => {
+    if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
+
+    if(!bcrypt.compareSync(req.body.currentContrasenia, user.contrasenia)) return res.status(404).send({message: 'Credenciales incorrectas - contraseña actual', status: false})
+    
+    user.contrasenia = bcrypt.hashSync(req.body.newContrasenia, 10);
+    user.save();
+
+    return res.status(201).send({message: 'Contraseña modificada', status: true})
+
+  })
+
+}
+
+function changePasswordFromLink(req, res) {
+  User.findOne({_id: req.body.userId}, (err, user) => {
+    if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
+    
+    user.contrasenia = bcrypt.hashSync(req.body.newContrasenia, 10);
+    user.save();
+
+    return res.status(201).send({message: 'Contraseña modificada', status: true})
+
+  })
+}
+
+
 module.exports = {
 
   getClient,
@@ -455,6 +569,9 @@ module.exports = {
   updateMomentNatural,
   updateMomentJuridical,
   getDataNatural,
-  getDataJuridical
+  getDataJuridical,
+  requestChangePassword,
+  changePasswordAdmin,
+  changePasswordFromLink
 
 }

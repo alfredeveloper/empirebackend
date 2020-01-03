@@ -3,8 +3,9 @@ const User = require('../models/user')
 const Request = require('../models/request')
 const Manager = require('../models/manager')
 const Client = require('../models/client')
-const MomentDataNaturalSchema = require('../models/moment_data_natural')
-const MomentDataJuridicalSchema = require('../models/moment_data_juridical')
+const ClientJuridical = require('../models/client_juridical')
+const MomentDataNatural = require('../models/moment_data_natural')
+const MomentDataJuridical = require('../models/moment_data_juridical')
 let nodeMailer = require('nodemailer');
 
 function registerRequest( req, res ) {
@@ -28,7 +29,17 @@ function getRequests(_, res) {
 
         if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
 
-        return res.status(201).send({message: `Listado de Solicitudes`, status: true, data: {natural: requests, juridical: requests}})
+        let natural = [];
+        let juridical = [];
+
+        requests.forEach(element => {
+            if(element.client.typeClient == 'natural') {
+                natural.push(element)
+            }else {
+                juridical.push(element)
+            }
+        });
+        return res.status(201).send({message: `Listado de Solicitudes`, status: true, data: {natural, juridical}})
 
     })
 
@@ -45,18 +56,79 @@ function changeStatusRequest(req, res) {
         request.save();
 
         if(req.body.resultado == 'aprobado') {
-            // actualizar data oficial
-            /*
-            if(req.body.typeClient == 'natural') {
-                User.findOne({_id: request.client.user._id}, (err, user)=> {
+            
+            if(request.client.typeClient == 'natural') {
+                MomentDataNatural.find({client: request.client._id}, (err, clientNatural) => {
                     if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+                    
+                    User.findOne({_id: request.client.user._id}, (err, user) => {
+                        if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
 
-                    user.nombres = req.body.nombres
+                        user.nombres = clientNatural[clientNatural.length - 1].nombres;
+                        user.apellidoPaterno = clientNatural[clientNatural.length - 1].apellidoPaterno;
+                        user.apellidoMaterno = clientNatural[clientNatural.length - 1].apellidoMaterno;
+                        user.departamento = clientNatural[clientNatural.length - 1].departamento;
+                        user.provincia = clientNatural[clientNatural.length - 1].provincia;
+                        user.distrito = clientNatural[clientNatural.length - 1].distrito;
+                        user.direccion = clientNatural[clientNatural.length - 1].direccion;
+                        user.tipoDocumento = clientNatural[clientNatural.length - 1].tipoDocumento;
+                        user.numDocumento = clientNatural[clientNatural.length - 1].numDocumento;
+                        user.fechaNacimiento = clientNatural[clientNatural.length - 1].fechaNacimiento;
+                        user.genero = clientNatural[clientNatural.length - 1].genero;
+                        user.telefono = clientNatural[clientNatural.length - 1].telefono;
+                        user.ocupacion = clientNatural[clientNatural.length - 1].ocupacion;
+                        user.centroLaboral = clientNatural[clientNatural.length - 1].centroLaboral;
+
+                        user.save()
+
+                        console.log('actualizacion realizada')
+                    })
                 })
-            }else {
+            } else {
+                MomentDataJuridical.find({client: request.client._id}, (err, clientJuridicalMoment) => {
+                    if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+                    
+                    ClientJuridical.findOne({client: clientJuridicalMoment[clientJuridicalMoment.length - 1].client}, (err, clientJuridical) => {
+                        if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+                        clientJuridical.razonSocial = clientJuridicalMoment.razonSocial
+                        clientJuridical.ruc = clientJuridicalMoment.ruc
+                        clientJuridical.partidaRegistral = clientJuridicalMoment.partidaRegistral
+                        clientJuridical.departamento = clientJuridicalMoment.departamento
+                        clientJuridical.provincia = clientJuridicalMoment.provincia
+                        clientJuridical.distrito = clientJuridicalMoment.distrito
+                        clientJuridical.direccion = clientJuridicalMoment.direccion
+                        clientJuridical.sede_registral = clientJuridicalMoment.sede_registral
+                        clientJuridical.nombreComercial = clientJuridicalMoment.nombreComercial
+                        clientJuridical.telefono = clientJuridicalMoment.telefono
 
+                       clientJuridical.save();
+
+                        User.findOne({_id: request.client.user._id}, (err, user) => {
+                            if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
+    
+                            user.nombres = clientJuridicalMoment[clientJuridicalMoment.length - 1].nombres;
+                            user.apellidoPaterno = clientJuridicalMoment[clientJuridicalMoment.length - 1].apellidoPaterno;
+                            user.apellidoMaterno = clientJuridicalMoment[clientJuridicalMoment.length - 1].apellidoMaterno;
+                            user.departamento = clientJuridicalMoment[clientJuridicalMoment.length - 1].departamento;
+                            user.provincia = clientJuridicalMoment[clientJuridicalMoment.length - 1].provincia;
+                            user.distrito = clientJuridicalMoment[clientJuridicalMoment.length - 1].distrito;
+                            user.direccion = clientJuridicalMoment[clientJuridicalMoment.length - 1].direccion;
+                            user.tipoDocumento = clientJuridicalMoment[clientJuridicalMoment.length - 1].tipoDocumento;
+                            user.numDocumento = clientJuridicalMoment[clientJuridicalMoment.length - 1].numDocumento;
+                            user.fechaNacimiento = clientJuridicalMoment[clientJuridicalMoment.length - 1].fechaNacimiento;
+                            user.genero = clientJuridicalMoment[clientJuridicalMoment.length - 1].genero;
+                            user.telefono = clientJuridicalMoment[clientJuridicalMoment.length - 1].telefono;
+                            user.ocupacion = clientJuridicalMoment[clientJuridicalMoment.length - 1].ocupacion;
+                            user.centroLaboral = clientJuridicalMoment[clientJuridicalMoment.length - 1].centroLaboral;
+    
+                            user.save()
+    
+                        })
+                    })
+
+                })
             }
-            */
+
             // enviar correo
             let transporter = nodeMailer.createTransport({
                 host: 'smtp.gmail.com',
