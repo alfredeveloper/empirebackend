@@ -225,7 +225,6 @@ function login (req, res) {
 
     if(!user) return res.status(404).send({message: `Credenciales incorrectas - correo electrónico`, status: false})
 
-    console.log(user.contrasenia)
     if(user.contrasenia == undefined || user.contrasenia == null || user.contrasenia == 'undefined') {
       if(user.momentContrasenia == req.body.contrasenia) {
         
@@ -234,12 +233,14 @@ function login (req, res) {
           if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
           
           if(client.typeClient == 'natural') {
+
             ClientNatural.findOne({client: client._id}, (err, clientNatural) => {
 
               if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
 
               return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientNatural._id})
             })
+
           }else {
             ClientJuridical.findOne({client: client._id}, (err, clientJuridical) => {
 
@@ -304,7 +305,7 @@ function loginAdmin (req, res) {
 
 function sendCode (req, res) {
 
-  Client.findOne({code: req.body.code}, (err, client) => {
+  Client.findOne({code: req.body.code}).populate('user').exec((err, client) => {
 
     if(err) return res.status(500).send({message: 'Error en el servidor', status: false})
 
