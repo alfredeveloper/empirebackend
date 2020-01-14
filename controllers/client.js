@@ -305,7 +305,7 @@ function loginAdmin (req, res) {
 
 function sendCode (req, res) {
 
-  Client.findOne({code: req.body.code}).populate('user').exec((err, client) => {
+  Client.find({code: req.body.code}).populate('user').exec((err, client) => {
 
     if(err) return res.status(500).send({message: 'Error en el servidor', status: false})
 
@@ -462,7 +462,6 @@ function updateMomentJuridical (req, res) {
 }
 
 function getDataNatural(req, res) {
-  console.log('natural')
   ClientNatural.findOne({_id: req.params.id}).populate({path: 'client', populate: {path: 'user'}}).exec((err, data)=> {
 
     if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
