@@ -31,15 +31,29 @@ function getRequests(_, res) {
 
         let natural = [];
         let juridical = [];
+        let accepteds = [];
+        let rejecteds = [];
 
         requests.forEach(element => {
             if(element.client.typeClient == 'natural') {
-                natural.push(element)
+                if(element.resultado == 'pendiente') {
+                    natural.push(element)
+                }
             }else {
-                juridical.push(element)
+                if(element.resultado == 'pendiente') {
+                    juridical.push(element)
+                }
+            }
+            if(element.resultado == 'aprobado') {
+                accepteds.push(element)
+            }
+
+            if(element.resultado == 'rechazado') {
+                rejecteds.push(element)
             }
         });
-        return res.status(201).send({message: `Listado de Solicitudes`, status: true, data: {natural, juridical}})
+
+        return res.status(201).send({message: `Listado de Solicitudes`, status: true, data: {natural, juridical, aceptados: accepteds, rechazados: rejecteds}})
 
     })
 
