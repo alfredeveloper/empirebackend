@@ -238,7 +238,7 @@ function login (req, res) {
 
               if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
 
-              return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientNatural._id})
+              return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientNatural._id, token: service.createToken(user)})
             })
 
           }else {
@@ -246,7 +246,7 @@ function login (req, res) {
 
               if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
 
-              return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientJuridical._id})
+              return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientJuridical._id, token: service.createToken(user)})
             })
           }
 
@@ -271,14 +271,14 @@ function login (req, res) {
           console.log('cleinte natuarl', clientNatural)
           if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
 
-          return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientNatural._id})
+          return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientNatural._id, token: service.createToken(user)})
         })
       }else {
         ClientJuridical.findOne({client: client._id}, (err, clientJuridical) => {
 
           if(err) return res.status(500).send({message: `Error en el servidor`, status: false})
 
-          return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientJuridical._id})
+          return res.status(201).send({message: 'Peticion exitosa', status: true, data: user, clientId: client._id, clientDirectId: clientJuridical._id, token: service.createToken(user)})
         })
       }
     })
@@ -334,8 +334,8 @@ function updateStatus (req, res) {
       let transporter = nodeMailer.createTransport({
         sendmail: true,
         host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
+        port: 587,
+        secure: false,
         auth: {
             // should be replaced with real sender's account
             user: 'mifarmatest@gmail.com',
@@ -365,7 +365,7 @@ function updateStatus (req, res) {
         sendmail: true,
         host: 'smtp.gmail.com',
         port: 587,
-        secure: true,
+        secure: false,
         auth: {
             // should be replaced with real sender's account
             user: 'mifarmatest@gmail.com',
@@ -496,8 +496,8 @@ function requestChangePassword(req, res) {
     let transporter = nodeMailer.createTransport({
       sendmail: true,
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false,
       auth: {
           // should be replaced with real sender's account
           user: 'mifarmatest@gmail.com',
