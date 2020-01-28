@@ -146,8 +146,8 @@ function changeStatusRequest(req, res) {
             // enviar correo
             let transporter = nodeMailer.createTransport({
                 host: 'smtp.gmail.com',
-                port: 465,
-                secure: true,
+                port: 587,
+                secure: false,
                 auth: {
                     // should be replaced with real sender's account
                     user: 'mifarmatest@gmail.com',
@@ -172,8 +172,8 @@ function changeStatusRequest(req, res) {
 
             let transporter = nodeMailer.createTransport({
                 host: 'smtp.gmail.com',
-                port: 465,
-                secure: true,
+                port: 587,
+                secure: false,
                 auth: {
                     user: 'mifarmatest@gmail.com',
                     pass: 'mifarmatest123456'

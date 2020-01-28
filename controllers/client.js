@@ -9,7 +9,7 @@ const service = require('../services')
 var bcrypt = require('bcryptjs');
 let nodeMailer = require('nodemailer');
 
-function registerClient(req, res) {
+function registerClient (req, res) {
   
   const user = new User(req.body);
   user['typeUser'] = 'client';
@@ -287,22 +287,6 @@ function login (req, res) {
 
 }
 
-function loginAdmin (req, res) {
-
-  User.findOne({correo: req.body.correo}, (err, user) => {
-
-    if(err) return res.status(500).send({message: `Error en el servidor ${err}`, status: false})
-
-    if(!user) return res.status(404).send({message: `Credenciales incorrectas - correo electrónico`, status: false})
-
-    if(!bcrypt.compareSync(req.body.contrasenia, user.contrasenia)) return res.status(404).send({message: 'Credenciales incorrectas - contraseña', status: false})
-
-    return res.status(201).send({message: 'Peticion exitosa', status: true, data: user})
-    
-  })
-
-}
-
 function sendCode (req, res) {
 
   Client.find({code: req.body.code}).populate('user').exec((err, client) => {
@@ -332,7 +316,6 @@ function updateStatus (req, res) {
 
     if(req.body.status == 'aceptado') {
       let transporter = nodeMailer.createTransport({
-        sendmail: true,
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
@@ -362,7 +345,6 @@ function updateStatus (req, res) {
     } else if (req.body.status == 'rechazado') {
 
       let transporter = nodeMailer.createTransport({
-        sendmail: true,
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
@@ -494,7 +476,6 @@ function requestChangePassword(req, res) {
 
     console.log('correo electronico', req.body.correo)
     let transporter = nodeMailer.createTransport({
-      sendmail: true,
       host: 'smtp.gmail.com',
       port: 587,
       secure: false,
@@ -562,7 +543,6 @@ module.exports = {
   updateClient,
   registerClient,
   login,
-  loginAdmin,
   sendCode,
   updateStatus,
   changePassword,

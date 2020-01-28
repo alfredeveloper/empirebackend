@@ -11,7 +11,6 @@ const api = express.Router()
 // usuario
 
 api.post('/login', clientController.login)
-api.post('/login/admin', clientController.loginAdmin)
 api.post('/logout', userCtrl.logout)
 
 // cliente
@@ -31,7 +30,9 @@ api.put('/change/password/admin', clientController.changePasswordAdmin)
 api.put('/change/password/link', clientController.changePasswordFromLink)
 
 // administrador
+api.post('/login/manager', managerController.login)
 api.get('/managers/:id', managerController.getManager);
+api.get('/managers', managerController.getManagers);
 api.post('/managers', managerController.registerManager);
 
 // request
