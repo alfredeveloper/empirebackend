@@ -18,7 +18,7 @@
     "express-handlebars": "^3.1.0",
     "fs": "0.0.1-security",
     "jwt-simple": "^0.5.6",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "mongoose": "^5.8.1",
     "nodemailer": "^6.4.2"
   },
